@@ -1,7 +1,7 @@
 window.docker = (function(docker) {
   docker.terminal = {
     startTerminalForContainer: function(host, container) {
-      var term = new Terminal();
+      var term = new Terminal(150, 40);
       term.open();
 
       var wsUri = "ws://" + 
@@ -37,13 +37,60 @@ window.docker = (function(docker) {
     }
   };
 
+
   return docker;
 })(window.docker || {});
 
-$(function() {
-  $("[data-docker-terminal-container]").each(function(i, el) {
-    var container = $(el).data('docker-terminal-container');
-    var host = $(el).data('docker-terminal-host');
-    docker.terminal.startTerminalForContainer(host, container);
+function ApiUrl () {
+  return 'http://' + /*'myserver/docker/host/' +*/ $('#setting_host').val();
+}
+
+$(function () {
+  $('#refresh_images').on('click', function () {
+    $('#setting_image').empty();
+    $.get(ApiUrl() + '/v1.5/images/json', function (d) {
+      d.map(function (image) {
+        var e = $('<option>').text(image.Tag).val(image.Id);
+        $('#setting_image').append(e);
+      });
+    });
   });
+
+  $('#start_image').on('click', function () {
+    $('.terminal').remove();
+    $.post(
+      ApiUrl() + '/v1.5/containers/create',
+      JSON.stringify({ "AttachStdin": true, "AttachStdout": true, "AttachStderr": true, "Tty": true,
+        "OpenStdin": true, "StdinOnce": true, "Cmd":["/bin/bash"], "Image": $('#setting_image').val() }),
+      function (container) {
+        $.post(ApiUrl() + '/v1.5/containers/' + container.Id + '/start', function () {
+          docker.terminal.startTerminalForContainer($('#setting_host').val(), container.Id);
+        });
+      }
+    );
+  });
+
+  $('#refresh_containers').on('click', function () {
+    $('#setting_container').empty();
+    $.get(ApiUrl() + '/v1.5/containers/json', function (d) {
+      d.map(function (container) {
+        var e = $('<option>').text(container.Id.slice(0,8) + ' - ' + container.Image).val(container.Id);
+        $('#setting_container').append(e);
+      });
+    });
+  });
+
+  $('#attach_container').on('click', function () {
+    $('.terminal').remove();
+    docker.terminal.startTerminalForContainer($('#setting_host').val(), $('#setting_container').val());
+  });
+
 });
+
+//$(function() {
+//  $("[data-docker-terminal-container]").each(function(i, el) {
+//    var container = $(el).data('docker-terminal-container');
+//    var host = $(el).data('docker-terminal-host');
+//    docker.terminal.startTerminalForContainer(host, container);
+//  });
+//});

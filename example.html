@@ -24,10 +24,103 @@
     background: #f0f0f0;
   }
 </style>
-<h1>tty.js</h1>
+<h1>Docker web interface</h1>
 <script src="vendor/term.js"></script>
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script src="docker_terminal.js"></script>
 
-<div data-docker-terminal-container="906d7ac84526"
-  data-docker-terminal-host="<your docker host>:<your docker api port>"></div>
+<!-- TABS -->
+<style>
+  ul.tabs {
+      margin: 0;
+      padding: 0;
+      float: left;
+      list-style: none;
+      height: 32px; /*--Set height of tabs--*/
+      border-bottom: 1px solid #999;
+      border-left: 1px solid #999;
+      width: 100%;
+  }
+  ul.tabs li {
+      float: left;
+      margin: 0;
+      padding: 0;
+      height: 31px; /*--Subtract 1px from the height of the unordered list--*/
+      line-height: 31px; /*--Vertically aligns the text within the tab--*/
+      border: 1px solid #999;
+      border-left: none;
+      margin-bottom: -1px; /*--Pull the list item down 1px--*/
+      overflow: hidden;
+      position: relative;
+      background: #e0e0e0;
+  }
+  ul.tabs li a {
+      text-decoration: none;
+      color: #000;
+      display: block;
+      padding: 0 20px;
+      border: 1px solid #fff; /*--Gives the bevel look with a 1px white border inside the list item--*/
+      outline: none;
+  }
+  ul.tabs li a:hover {
+      background: #ccc;
+  }
+  html ul.tabs li.active, html ul.tabs li.active a:hover  { /*--Makes sure that the active tab does not listen to the hover properties--*/
+      background: #fff;
+      border-bottom: 1px solid #fff; /*--Makes the active tab look like it's connected with its content--*/
+  }
+
+  .tab_container {
+      border: 1px solid #999;
+      border-top: none;
+      overflow: hidden;
+      clear: both;
+      float: left; width: 100%;
+      background: #fff;
+  }
+  .tab_content {
+      padding: 20px;
+  }
+</style>
+<script>
+$(function() {
+
+    //When page loads...
+    $(".tab_content").hide(); //Hide all content
+    $("ul.tabs li:first").addClass("active").show(); //Activate first tab
+    $(".tab_content:first").show(); //Show first tab content
+
+    //On Click Event
+    $("ul.tabs li").click(function() {
+
+        $("ul.tabs li").removeClass("active"); //Remove any "active" class
+        $(this).addClass("active"); //Add "active" class to selected tab
+        $(".tab_content").hide(); //Hide all tab content
+
+        var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
+        $(activeTab).fadeIn(); //Fade in the active ID content
+        return false;
+    });
+
+});
+</script>
+
+<label>Host: <input id="setting_host" value="10.194.12.221:49000"></input></label><br>
+<hr>
+<ul class="tabs">
+  <li><a href="#panel_new_image">Run new image</a></li>
+  <li><a href="#panel_attach_container">Attach running container</a></li>
+</ul>
+<div class="tab_container">
+  <div id="panel_new_image" class="panel tab_content">
+    <button id="refresh_images">Refresh available images</button><br>
+    <label>Available images: <select id="setting_image"></select></label><br>
+    <button id="start_image">Start image</button><br>
+  </div>
+  <div id="panel_attach_container" class="panel tab_content">
+    <button id="refresh_containers">Refresh available containers</button><br>
+    <label>Available containers: <select id="setting_container"></select></label><br>
+    <button id="attach_container">Attach to container</button><br>
+  </div>
+</div>
+<br>
