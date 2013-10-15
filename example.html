@@ -123,13 +123,11 @@ $(function() {
       step();
     };
     websocket.onmessage = function(evt) {
-      console.log(evt.data);
       if (evt.data == 'connected') {
         progress = progress | 2;
         step();
       } else if (evt.data == echoString) {
         progress = progress | 4;
-        console.log(progress);
         step();
       }
     };
