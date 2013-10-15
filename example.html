@@ -106,6 +106,70 @@ $(function() {
 </script>
 
 <label>Host: <input id="setting_host" value="10.194.12.221:49000"></input></label><br>
+<script>
+  ;(function () {
+    var wsUri = "ws://myserver:22381"
+
+    var echoString = Math.random().toString(36);
+    var progress = 0;
+
+    var websocket = new WebSocket(wsUri);
+    window.wstest = websocket;
+    websocket.onopen = function(evt) {
+      progress = progress | 1;
+      step();
+    };
+    websocket.onclose = function(evt) {
+      progress = progress | 8;
+      step();
+    };
+    websocket.onmessage = function(evt) {
+      console.log(evt.data);
+      if (evt.data == 'connected') {
+        progress = progress | 2;
+        step();
+      } else if (evt.data == echoString) {
+        progress = progress | 4;
+        console.log(progress);
+        step();
+      }
+    };
+    websocket.onerror = function(evt) {
+      $('#ws_test').text($('#ws_test').text() + '__ERROR ENCOUNTERED__');
+      step();
+    };
+
+    function step () {
+      switch (progress) {
+        case 1:
+          $('#ws_test').text($('#ws_test').text() + 'connect success...');
+          break;
+        case 3:
+          $('#ws_test').text($('#ws_test').text() + 'receive success...');
+          websocket.send(echoString);
+          break;
+        case 7:
+          $('#ws_test').text($('#ws_test').text() + 'echo success...');
+          websocket.close();
+          break;
+        case 15:
+          $('#ws_test').text($('#ws_test').text() + 'disconnect success...');
+          $('#ws_test').text($('#ws_test').text() + 'WS SUCCESS');
+          $('#ws_status').text('Websockets are available');
+          break;
+        default:
+          $('#ws_test').text($('#ws_test').text() + '__UNRECOGNISED STATE__');
+          $('#ws_status').text('Websockets appear to be unavailable, please try disabling any proxies');
+          $('#ws_status').css('color', 'red');
+          break;
+      }
+    }
+
+  })();
+</script>
+
+<div id="ws_status"></div>
+<div id="ws_test" style="display: none;"></div>
 <hr>
 <ul class="tabs">
   <li><a href="#panel_new_image">Run new image</a></li>
