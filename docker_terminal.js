@@ -61,10 +61,12 @@ $(function () {
     $.post(
       ApiUrl() + '/v1.5/containers/create',
       JSON.stringify({ "AttachStdin": true, "AttachStdout": true, "AttachStderr": true, "Tty": true,
-        "OpenStdin": true, "StdinOnce": true, "Cmd":["/bin/bash"], "Image": $('#setting_image').val() }),
+        "OpenStdin": true, "StdinOnce": true, "Cmd":["/bin/bash"], "Hostname":"test1",
+        "Image": $('#setting_image').val() }),
       function (container) {
         $.post(ApiUrl() + '/v1.5/containers/' + container.Id + '/start', function () {
           docker.terminal.startTerminalForContainer($('#setting_host').val(), container.Id);
+          $('#container_id').text(container.Id.slice(0,8));
         });
       }
     );
@@ -83,6 +85,7 @@ $(function () {
   $('#attach_container').on('click', function () {
     $('.terminal').remove();
     docker.terminal.startTerminalForContainer($('#setting_host').val(), $('#setting_container').val());
+    $('#container_id').text($('#setting_container').val().slice(0,8));
   });
 
 });
