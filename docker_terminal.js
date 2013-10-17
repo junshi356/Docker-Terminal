@@ -4,10 +4,10 @@ window.docker = (function(docker) {
       var term = new Terminal(150, 40);
       term.open();
 
-      var wsUri = "ws://" + 
-        host + 
-        "/v1.5/containers/" + 
-        container + 
+      var wsUri = "ws://" +
+        host +
+        "/v1.5/containers/" +
+        container +
         "/attach/ws?logs=1&stderr=1&stdout=1&stream=1&stdin=1";
 
       var websocket = new WebSocket(wsUri);
@@ -20,20 +20,20 @@ window.docker = (function(docker) {
         websocket.send(data);
       });
 
-      function onOpen(evt) { 
+      function onOpen(evt) {
         term.write("Session started");
-      }  
+      }
 
-      function onClose(evt) { 
+      function onClose(evt) {
         term.write("Session terminated");
-      }  
+      }
 
-      function onMessage(evt) { 
+      function onMessage(evt) {
         term.write(evt.data);
-      }  
+      }
 
-      function onError(evt) { 
-      }  
+      function onError(evt) {
+      }
     }
   };
 
