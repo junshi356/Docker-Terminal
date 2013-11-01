@@ -50,7 +50,7 @@ $(function () {
     $('#setting_image').empty();
     $.get(ApiUrl() + '/v1.5/images/json', function (d) {
       d.map(function (image) {
-        var e = $('<option>').text(image.Tag).val(image.Id);
+        var e = $('<option>').text(image.Tag + ' - ' + image.Repository).val(image.Id);
         $('#setting_image').append(e);
       });
     });
