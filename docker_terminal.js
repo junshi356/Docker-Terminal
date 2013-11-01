@@ -6,7 +6,7 @@ window.docker = (function(docker) {
 
       var wsUri = "ws://" +
         host +
-        "/v1.5/containers/" +
+        "/v1.6/containers/" +
         container +
         "/attach/ws?logs=1&stderr=1&stdout=1&stream=1&stdin=1";
 
@@ -48,7 +48,7 @@ function ApiUrl () {
 $(function () {
   $('#refresh_images').on('click', function () {
     $('#setting_image').empty();
-    $.get(ApiUrl() + '/v1.5/images/json', function (d) {
+    $.get(ApiUrl() + '/v1.6/images/json', function (d) {
       d.map(function (image) {
         var e = $('<option>').text(image.Tag + ' - ' + image.Repository).val(image.Id);
         $('#setting_image').append(e);
@@ -58,23 +58,33 @@ $(function () {
 
   $('#start_image').on('click', function () {
     $('.terminal').remove();
-    $.post(
-      ApiUrl() + '/v1.5/containers/create',
-      JSON.stringify({ "AttachStdin": true, "AttachStdout": true, "AttachStderr": true, "Tty": true,
+    $.ajax({
+      type: 'POST',
+      dataType: "json",
+      contentType: "application/json",
+      url: ApiUrl() + '/v1.6/containers/create',
+      data: JSON.stringify({ "AttachStdin": true, "AttachStdout": true, "AttachStderr": true, "Tty": true,
         "OpenStdin": true, "StdinOnce": true, "Cmd":["/bin/bash"], "Hostname":"test1",
         "Image": $('#setting_image').val() }),
-      function (container) {
-        $.post(ApiUrl() + '/v1.5/containers/' + container.Id + '/start', function () {
-          docker.terminal.startTerminalForContainer($('#setting_host').val(), container.Id);
-          $('#container_id').text(container.Id.slice(0,8));
+      success: function (container) {
+        $.ajax({
+          type: 'POST',
+          dataType: "json",
+          contentType: "application/json",
+          url: ApiUrl() + '/v1.6/containers/' + container.Id + '/start',
+          data: "{}",
+          success: function () {
+            docker.terminal.startTerminalForContainer($('#setting_host').val(), container.Id);
+            $('#container_id').text(container.Id.slice(0,8));
+          }
         });
       }
-    );
+      });
   });
 
   $('#refresh_containers').on('click', function () {
     $('#setting_container').empty();
-    $.get(ApiUrl() + '/v1.5/containers/json', function (d) {
+    $.get(ApiUrl() + '/v1.6/containers/json', function (d) {
       d.map(function (container) {
         var e = $('<option>').text(container.Id.slice(0,8) + ' - ' + container.Image).val(container.Id);
         $('#setting_container').append(e);
