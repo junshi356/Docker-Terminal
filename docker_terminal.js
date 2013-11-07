@@ -45,6 +45,17 @@ function ApiUrl () {
   return 'http://' + /*'myserver/docker/host/' +*/ $('#setting_host').val();
 }
 
+function containername (container) {
+  if (container.Names != undefined && container.Names.length > 0) {
+    return container.Names[0].replace('/','') + ' (' + container.Id.slice(0,6) + ')';
+  } else if (container.Name != undefined) {
+    // This was obtained with a call to /containers/<ID>/json, note ID is different to Id
+    return container.Name.replace('/','') + ' (' + container.ID.slice(0,6) + ')';
+  } else {
+    return container.Id.slice(0,6);
+  }
+}
+
 $(function () {
   $('#refresh_images').on('click', function () {
     $('#setting_image').empty();
@@ -66,16 +77,19 @@ $(function () {
       data: JSON.stringify({ "AttachStdin": true, "AttachStdout": true, "AttachStderr": true, "Tty": true,
         "OpenStdin": true, "StdinOnce": true, "Cmd":["/bin/bash"], "Hostname":"test1",
         "Image": $('#setting_image').val() }),
-      success: function (container) {
+      success: function (containerid) {
+        containerid = containerid.Id; // there's no other data in this object
         $.ajax({
           type: 'POST',
           dataType: "json",
           contentType: "application/json",
-          url: ApiUrl() + '/v1.6/containers/' + container.Id + '/start',
+          url: ApiUrl() + '/v1.6/containers/' + containerid + '/start',
           data: "{}",
           success: function () {
-            docker.terminal.startTerminalForContainer($('#setting_host').val(), container.Id);
-            $('#container_id').text(container.Id.slice(0,8));
+            docker.terminal.startTerminalForContainer($('#setting_host').val(), containerid);
+            $.get(ApiUrl() + '/v1.6/containers/' + containerid + '/json', function (container) {
+              $('#container_id').text(containername(container));
+            });
           }
         });
       }
@@ -86,7 +100,8 @@ $(function () {
     $('#setting_container').empty();
     $.get(ApiUrl() + '/v1.6/containers/json', function (d) {
       d.map(function (container) {
-        var e = $('<option>').text(container.Id.slice(0,8) + ' - ' + container.Image).val(container.Id);
+        var e = $('<option>').text(containername(container) + ' - ' + container.Image).val(container.Id);
+        $(e).data(container);
         $('#setting_container').append(e);
       });
     });
@@ -94,8 +109,9 @@ $(function () {
 
   $('#attach_container').on('click', function () {
     $('.terminal').remove();
-    docker.terminal.startTerminalForContainer($('#setting_host').val(), $('#setting_container').val());
-    $('#container_id').text($('#setting_container').val().slice(0,8));
+    var container = $('#setting_container option:selected').data();
+    docker.terminal.startTerminalForContainer($('#setting_host').val(), container.Id);
+    $('#container_id').text(containername(container));
   });
 
 });
