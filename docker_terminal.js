@@ -55,13 +55,22 @@ function containername (container) {
     return container.Id.slice(0,6);
   }
 }
+function imagename (image) {
+  if (image.Tag && image.Repository) {
+    return image.Tag + ' - ' + image.Repository + ' (' + image.Id.slice(0,6) + ')';
+  } else {
+    return image.Id.slice(0,6);
+  }
+
+}
 
 $(function () {
   $('#refresh_images').on('click', function () {
     $('#setting_image').empty();
     $.get(ApiUrl() + '/v1.6/images/json', function (d) {
       d.map(function (image) {
-        var e = $('<option>').text(image.Tag + ' - ' + image.Repository).val(image.Id);
+        var e = $('<option>').text(imagename(image));
+        $(e).data(image);
         $('#setting_image').append(e);
       });
     });
@@ -76,7 +85,7 @@ $(function () {
       url: ApiUrl() + '/v1.6/containers/create',
       data: JSON.stringify({ "AttachStdin": true, "AttachStdout": true, "AttachStderr": true, "Tty": true,
         "OpenStdin": true, "StdinOnce": true, "Cmd":["/bin/bash"], "Hostname":"test1",
-        "Image": $('#setting_image').val() }),
+        "Image": $('#setting_image option:selected').data().Id }),
       success: function (containerid) {
         containerid = containerid.Id; // there's no other data in this object
         $.ajax({
