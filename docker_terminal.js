@@ -21,11 +21,11 @@ window.docker = (function(docker) {
       });
 
       function onOpen(evt) {
-        term.write("Session started");
+        term.write("Session started\r\n");
       }
 
       function onClose(evt) {
-        term.write("Session terminated");
+        term.write("Session terminated\r\n");
       }
 
       function onMessage(evt) {
