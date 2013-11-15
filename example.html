@@ -24,10 +24,14 @@
     background: #f0f0f0;
   }
 </style>
-<h1>Docker web interface</h1>
+<h1>Docker web interface - CONTAINERS RUNNING FOR >30 MINS MAY BE TERMINATED</h1>
 <script src="vendor/term.js"></script>
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script src="docker_terminal.js"></script>
+<script>
+  window.docker_server = "myserver:22380";
+  window.ws_test_server = "myserver:22381";
+</script>
 
 <!-- TABS -->
 <style>
@@ -107,7 +111,7 @@ $(function() {
 
 <script>
   ;(function () {
-    var wsUri = "ws://myserver:22381"
+    var wsUri = "ws://" + window.ws_test_server;
 
     var echoString = Math.random().toString(36);
     var progress = 0;
@@ -167,7 +171,8 @@ $(function() {
 
 <div id="ws_status"></div>
 <div id="ws_test" style="display: none;"></div>
-<label>Host: <input id="setting_host" value="myserver:22380"></input></label><br>
+<label>Host: <input id="setting_host" value=""></input></label><br>
+<script>$('#setting_host').val(window.docker_server);</script>
 <hr>
 <ul class="tabs">
   <li><a href="#panel_new_image">Run new image</a></li>
