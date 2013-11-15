@@ -42,7 +42,7 @@ window.docker = (function(docker) {
 })(window.docker || {});
 
 function ApiUrl () {
-  return 'http://' + /*'myserver/docker/host/' +*/ $('#setting_host').val();
+  return 'http://' + $('#setting_host').val();
 }
 
 function containername (container) {
