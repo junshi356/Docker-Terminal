@@ -93,7 +93,7 @@ $(function () {
           dataType: "json",
           contentType: "application/json",
           url: ApiUrl() + '/v1.6/containers/' + containerid + '/start',
-          data: JSON.stringify({}),
+          data: JSON.stringify({ "Privileged": false }),
           success: function () {
             docker.terminal.startTerminalForContainer($('#setting_host').val(), containerid);
             $.get(ApiUrl() + '/v1.6/containers/' + containerid + '/json', function (container) {
