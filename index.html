@@ -59,28 +59,25 @@
 <link rel="stylesheet" type="text/css" href="vendor/react-simpletabs-0.4.21.min.css" />
 </head>
 <body>
+
 <h1>Docker Terminal</h1>
-<div id="ws_status"></div>
 <label>Host: <input id="setting_host" value=""></input></label><br>
 <hr>
+<div id="tabs"></div>
+<div>Your container is <span id="container_id">______</span></div>
+<br>
+<div id="term_container"></div>
 
 <script src="vendor/react-0.12.2.min.js"></script>
 <script src="vendor/JSXTransformer-0.12.2.min.js"></script>
 <script src="vendor/react-simpletabs-0.4.21.min.js"></script>
 <script src="vendor/term.js"></script>
 <script src="vendor/jquery-1.10.1.min.js"></script>
+<script src="docker_terminal.js"></script>
 <script>
   window.docker_server = window.location.hostname + ":2375";
   $('#setting_host').val(window.docker_server);
 </script>
-<script src="docker_terminal.js"></script>
-
-<div id="tabs"></div>
-
-<div>Your container is <span id="container_id">______</span></div>
-<br>
-<div id="term_container"></div>
-
 <script type="text/jsx">
 function ApiUrl () {
   return 'http://' + $('#setting_host').val();
@@ -93,18 +90,35 @@ function imagename (image) {
     return image.Id.slice(0,6);
   }
 }
+function containername (container) {
+  if (container.Names != undefined && container.Names.length > 0) {
+    return container.Names[0].replace('/','') + ' (' + container.Id.slice(0,6) + ')';
+  } else if (container.Name != undefined) {
+    // This was obtained with a call to /containers/<ID>/json, note ID is different to Id
+    return container.Name.replace('/','') + ' (' + container.ID.slice(0,6) + ')';
+  } else {
+    return container.Id.slice(0,6);
+  }
+}
 
 var Tabs = ReactSimpleTabs;
 var App = React.createClass({
   getInitialState: function () {
-    return {'images': [], 'selectedImageId': ''};
+    return {
+      'images': [], 'selectedImageId': '',
+      'containers': [], 'selectedContainerId': '',
+      'tabActive': 1
+    };
   },
   render: function() {
     var imageOptions = this.state.images.map(function (image) {
       return <option value={image.Id}>{imagename(image)}</option>;
     }, this);
+    var containerOptions = this.state.containers.map(function (container) {
+      return <option value={container.Id}>{containername(container) + ' - ' + container.Image}</option>;
+    }, this);
     return (
-      <Tabs tabActive={1}>
+      <Tabs onBeforeChange={this.onTabChange} tabActive={this.state.tabActive}>
 
         <Tabs.Panel title='Run new image'>
           <button onClick={this.onRefreshImages}>Refresh available images</button><br />
@@ -117,17 +131,29 @@ var App = React.createClass({
         </Tabs.Panel>
 
         <Tabs.Panel title='Attach to container'>
-          <button id="refresh_containers">Refresh available containers</button><br />
-          <label>Available containers: <select id="setting_container"></select></label><br />
-          <button id="attach_container">Attach to container</button><br />
+          <button onClick={this.onRefreshContainers}>Refresh available containers</button><br />
+          <label>Available containers:
+            <select onChange={this.onContainerChange} value={this.state.selectedContainerId}>
+              {containerOptions}
+            </select>
+          </label><br />
+          <button onClick={this.onAttachContainer}>Attach to container</button><br />
         </Tabs.Panel>
 
       </Tabs>
     );
   },
+  onTabChange: function (tabActive) {
+    this.setState({'tabActive': tabActive});
+  },
   onRefreshImages: function () {
     $.get(ApiUrl() + '/v1.6/images/json', function (imagelist) {
       this.setState({'images': imagelist, 'selectedImageId': imagelist[0].Id});
+    }.bind(this));
+  },
+  onRefreshContainers: function () {
+    $.get(ApiUrl() + '/v1.6/containers/json', function (containerlist) {
+      this.setState({'containers': containerlist, 'selectedContainerId': containerlist[0].Id});
     }.bind(this));
   },
   onImageChange: function (e) {
@@ -160,10 +186,18 @@ var App = React.createClass({
         });
       }
     });
+  },
+  onAttachContainer: function () {
+    $('.terminal').remove();
+    var container;
+    this.state.containers.map(function (c) {
+      if (c.Id === this.state.selectedContainerId) { container = c; }
+    }, this);
+    docker.terminal.startTerminalForContainer($('#setting_host').val(), container.Id);
+    $('#container_id').text(containername(container));
   }
 });
 React.renderComponent(<App />, document.getElementById('tabs'));
-initHandlers();
 </script>
 </body>
 </html>
