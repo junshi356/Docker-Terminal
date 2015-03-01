@@ -65,7 +65,7 @@ function imagename (image) {
 
 }
 
-$(function () {
+window.initHandlers = function () {
   $('#refresh_images').on('click', function () {
     $('#setting_image').empty();
     $.get(ApiUrl() + '/v1.6/images/json', function (d) {
@@ -124,7 +124,7 @@ $(function () {
     $('#container_id').text(containername(container));
   });
 
-});
+};
 
 //$(function() {
 //  $("[data-docker-terminal-container]").each(function(i, el) {

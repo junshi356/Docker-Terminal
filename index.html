@@ -1,5 +1,6 @@
 <!doctype html>
 <title>Docker Terminal</title>
+
 <style>
   h1 {
     margin-bottom: 20px;
@@ -20,109 +21,89 @@
     background: #f0f0f0;
   }
 </style>
-<h1>Docker Terminal</h1>
-<script src="vendor/term.js"></script>
-<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-<script src="docker_terminal.js"></script>
-<script>
-  window.docker_server = window.location.hostname + ":2375";
-</script>
 
-<!-- TABS -->
+<h1>Docker Terminal</h1>
+<link rel="stylesheet" type="text/css" href="vendor/react-simpletabs-0.4.21.min.css" media="screen" />
+
 <style>
-  ul.tabs {
+  body {
+      background: #fff;
+  }
+  .tabs-navigation {
       margin: 0;
       padding: 0;
-      float: left;
-      list-style: none;
       height: 32px; /*--Set height of tabs--*/
+      border-bottom: 1px solid #999;
+  }
+  #tabs {
       border-bottom: 1px solid #999;
       border-left: 1px solid #999;
       width: 100%;
   }
-  ul.tabs li {
-      float: left;
+  ul.tabs-menu li {
       margin: 0;
       padding: 0;
-      height: 31px; /*--Subtract 1px from the height of the unordered list--*/
-      line-height: 31px; /*--Vertically aligns the text within the tab--*/
+      height: 31px; /* Subtract 1px from the height of the unordered list */
+      line-height: 31px; /* Vertically aligns the text within the tab */
       border: 1px solid #999;
       border-left: none;
-      margin-bottom: -1px; /*--Pull the list item down 1px--*/
-      overflow: hidden;
-      position: relative;
       background: #e0e0e0;
   }
-  ul.tabs li a {
-      text-decoration: none;
+  ul.tabs-menu li a {
+      text-decoration: none; /* No link underline */
       color: #000;
-      display: block;
       padding: 0 20px;
-      border: 1px solid #fff; /*--Gives the bevel look with a 1px white border inside the list item--*/
-      outline: none;
+      border: 1px solid #fff; /* Gives the bevel look with a 1px white border inside the list item */
   }
-  ul.tabs li a:hover {
-      background: #ccc;
-  }
-  html ul.tabs li.active, html ul.tabs li.active a:hover  { /*--Makes sure that the active tab does not listen to the hover properties--*/
+  ul.tabs-menu li.is-active {
       background: #fff;
-      border-bottom: 1px solid #fff; /*--Makes the active tab look like it's connected with its content--*/
+      border-bottom: 1px solid #fff; /* Makes the active tab look like it's connected with its content */
   }
-
-  .tab_container {
-      border: 1px solid #999;
-      border-top: none;
-      overflow: hidden;
-      clear: both;
-      float: left; width: 100%;
-      background: #fff;
-  }
-  .tab_content {
+  .tab-panel {
       padding: 20px;
   }
 </style>
-<script>
-$(function() {
-
-    //When page loads...
-    $(".tab_content").hide(); //Hide all content
-    $("ul.tabs li:first").addClass("active").show(); //Activate first tab
-    $(".tab_content:first").show(); //Show first tab content
-
-    //On Click Event
-    $("ul.tabs li").click(function() {
-
-        $("ul.tabs li").removeClass("active"); //Remove any "active" class
-        $(this).addClass("active"); //Add "active" class to selected tab
-        $(".tab_content").hide(); //Hide all tab content
-
-        var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
-        $(activeTab).fadeIn(); //Fade in the active ID content
-        return false;
-    });
-
-});
-</script>
 
 <div id="ws_status"></div>
 <label>Host: <input id="setting_host" value=""></input></label><br>
-<script>$('#setting_host').val(window.docker_server);</script>
 <hr>
-<ul class="tabs">
-  <li><a href="#panel_new_image">Run new image</a></li>
-  <li><a href="#panel_attach_container">Attach running container</a></li>
-</ul>
-<div class="tab_container">
-  <div id="panel_new_image" class="panel tab_content">
-    <button id="refresh_images">Refresh available images</button><br>
-    <label>Available images: <select id="setting_image"></select></label><br>
-    <button id="start_image">Start image</button><br>
-  </div>
-  <div id="panel_attach_container" class="panel tab_content">
-    <button id="refresh_containers">Refresh available containers</button><br>
-    <label>Available containers: <select id="setting_container"></select></label><br>
-    <button id="attach_container">Attach to container</button><br>
-  </div>
-</div>
+
+<script src="vendor/react-0.12.2.min.js"></script>
+<script src="vendor/JSXTransformer-0.12.2.min.js"></script>
+<script src="vendor/react-simpletabs-0.4.21.min.js"></script>
+<script src="vendor/term.js"></script>
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script>
+  window.docker_server = window.location.hostname + ":2375";
+  $('#setting_host').val(window.docker_server);
+</script>
+<script src="docker_terminal.js"></script>
+
+<div id="tabs"></div>
+
+<script type="text/jsx">
+var Tabs = ReactSimpleTabs;
+var App = React.createClass({
+  render: function() {
+    return (
+      <Tabs tabActive={1}>
+        <Tabs.Panel title='Run new image'>
+          <button id="refresh_images">Refresh available images</button><br />
+          <label>Available images: <select id="setting_image"></select></label><br />
+          <button id="start_image">Start image</button><br />
+        </Tabs.Panel>
+        <Tabs.Panel title='Attach to container'>
+          <button id="refresh_containers">Refresh available containers</button><br />
+          <label>Available containers: <select id="setting_container"></select></label><br />
+          <button id="attach_container">Attach to container</button><br />
+        </Tabs.Panel>
+      </Tabs>
+    );
+  }
+});
+React.renderComponent(<App />, document.getElementById('tabs'));
+initHandlers();
+</script>
+
 <div>Your container is <span id="container_id">______</span></div>
 <br>
