@@ -82,14 +82,37 @@
 <div id="tabs"></div>
 
 <script type="text/jsx">
+function ApiUrl () {
+  return 'http://' + $('#setting_host').val();
+}
+
+function imagename (image) {
+  if (image.Tag && image.Repository) {
+    return image.Tag + ' - ' + image.Repository + ' (' + image.Id.slice(0,6) + ')';
+  } else {
+    return image.Id.slice(0,6);
+  }
+}
+
+
 var Tabs = ReactSimpleTabs;
 var App = React.createClass({
+  getInitialState: function () {
+    return {'images': [], 'selectedImageId': ''};
+  },
   render: function() {
+    var imageOptions = this.state.images.map(function (image) {
+      return <option value={image.Id}>{imagename(image)}</option>;
+    }, this);
     return (
       <Tabs tabActive={1}>
         <Tabs.Panel title='Run new image'>
-          <button id="refresh_images">Refresh available images</button><br />
-          <label>Available images: <select id="setting_image"></select></label><br />
+          <button onClick={this.onRefreshImages}>Refresh available images</button><br />
+          <label>Available images:
+            <select id='setting_image' onChange={this.onImageChange} value={this.state.selectedImageId}>
+              {imageOptions}
+            </select>
+          </label><br />
           <button id="start_image">Start image</button><br />
         </Tabs.Panel>
         <Tabs.Panel title='Attach to container'>
@@ -99,6 +122,14 @@ var App = React.createClass({
         </Tabs.Panel>
       </Tabs>
     );
+  },
+  onRefreshImages: function () {
+    $.get(ApiUrl() + '/v1.6/images/json', function (imagelist) {
+      this.setState({'images': imagelist, 'selectedImageId': imagelist[0].Id});
+    }.bind(this));
+  },
+  onImageChange: function (e) {
+    this.setState({'selectedImageId': e.target.value});
   }
 });
 React.renderComponent(<App />, document.getElementById('tabs'));

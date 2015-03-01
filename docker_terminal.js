@@ -42,10 +42,6 @@ window.docker = (function() {
   return docker;
 })();
 
-function ApiUrl () {
-  return 'http://' + $('#setting_host').val();
-}
-
 function containername (container) {
   if (container.Names != undefined && container.Names.length > 0) {
     return container.Names[0].replace('/','') + ' (' + container.Id.slice(0,6) + ')';
@@ -56,27 +52,7 @@ function containername (container) {
     return container.Id.slice(0,6);
   }
 }
-function imagename (image) {
-  if (image.Tag && image.Repository) {
-    return image.Tag + ' - ' + image.Repository + ' (' + image.Id.slice(0,6) + ')';
-  } else {
-    return image.Id.slice(0,6);
-  }
-
-}
-
 window.initHandlers = function () {
-  $('#refresh_images').on('click', function () {
-    $('#setting_image').empty();
-    $.get(ApiUrl() + '/v1.6/images/json', function (d) {
-      d.map(function (image) {
-        var e = $('<option>').text(imagename(image));
-        $(e).data(image);
-        $('#setting_image').append(e);
-      });
-    });
-  });
-
   $('#start_image').on('click', function () {
     $('.terminal').remove();
     $.ajax({
@@ -86,7 +62,7 @@ window.initHandlers = function () {
       url: ApiUrl() + '/v1.6/containers/create',
       data: JSON.stringify({ "AttachStdin": true, "AttachStdout": true, "AttachStderr": true, "Tty": true,
         "OpenStdin": true, "StdinOnce": true, "Cmd":["/bin/bash"], "Hostname":"test1", "Privileged": false,
-        "Image": $('#setting_image option:selected').data().Id }),
+        "Image": $('#setting_image').val() }),
       success: function (containerid) {
         containerid = containerid.Id; // there's no other data in this object
         $.ajax({
