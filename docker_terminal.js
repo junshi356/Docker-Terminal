@@ -53,35 +53,6 @@ function containername (container) {
   }
 }
 window.initHandlers = function () {
-  $('#start_image').on('click', function () {
-    $('.terminal').remove();
-    $.ajax({
-      type: 'POST',
-      dataType: "json",
-      contentType: "application/json",
-      url: ApiUrl() + '/v1.6/containers/create',
-      data: JSON.stringify({ "AttachStdin": true, "AttachStdout": true, "AttachStderr": true, "Tty": true,
-        "OpenStdin": true, "StdinOnce": true, "Cmd":["/bin/bash"], "Hostname":"test1", "Privileged": false,
-        "Image": $('#setting_image').val() }),
-      success: function (containerid) {
-        containerid = containerid.Id; // there's no other data in this object
-        $.ajax({
-          type: 'POST',
-          dataType: "json",
-          contentType: "application/json",
-          url: ApiUrl() + '/v1.6/containers/' + containerid + '/start',
-          data: JSON.stringify({ "Privileged": false }),
-          success: function () {
-            docker.terminal.startTerminalForContainer($('#setting_host').val(), containerid);
-            $.get(ApiUrl() + '/v1.6/containers/' + containerid + '/json', function (container) {
-              $('#container_id').text(containername(container));
-            });
-          }
-        });
-      }
-      });
-  });
-
   $('#refresh_containers').on('click', function () {
     $('#setting_container').empty();
     $.get(ApiUrl() + '/v1.6/containers/json', function (d) {
@@ -99,7 +70,6 @@ window.initHandlers = function () {
     docker.terminal.startTerminalForContainer($('#setting_host').val(), container.Id);
     $('#container_id').text(containername(container));
   });
-
 };
 
 //$(function() {
