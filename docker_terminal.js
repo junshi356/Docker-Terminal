@@ -2,7 +2,10 @@ window.docker = (function() {
   var docker = {};
   docker.terminal = {
     startTerminalForContainer: function(host, container) {
-      var term = new Terminal(150, 40);
+      var term = new Terminal({
+        'cols': 150, 'rows': 40,
+        'parent': document.getElementById('term_container')
+      });
       term.open();
 
       var wsUri = "ws://" +
