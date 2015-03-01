@@ -1,12 +1,15 @@
 <!doctype html>
+<html>
+<head>
 <title>Docker Terminal</title>
-
 <style>
+  body {
+      background: #fff;
+  }
   h1 {
     margin-bottom: 20px;
     font: 20px/1.5 sans-serif;
   }
-
   .terminal {
     float: left;
     border: #000 solid 5px;
@@ -15,19 +18,9 @@
     color: #f0f0f0;
     background: #000;
   }
-
   .reverse-video {
     color: #000;
     background: #f0f0f0;
-  }
-</style>
-
-<h1>Docker Terminal</h1>
-<link rel="stylesheet" type="text/css" href="vendor/react-simpletabs-0.4.21.min.css" media="screen" />
-
-<style>
-  body {
-      background: #fff;
   }
   .tabs-navigation {
       margin: 0;
@@ -63,7 +56,10 @@
       padding: 20px;
   }
 </style>
-
+<link rel="stylesheet" type="text/css" href="vendor/react-simpletabs-0.4.21.min.css" />
+</head>
+<body>
+<h1>Docker Terminal</h1>
 <div id="ws_status"></div>
 <label>Host: <input id="setting_host" value=""></input></label><br>
 <hr>
@@ -81,6 +77,9 @@
 
 <div id="tabs"></div>
 
+<div>Your container is <span id="container_id">______</span></div>
+<br>
+
 <script type="text/jsx">
 function ApiUrl () {
   return 'http://' + $('#setting_host').val();
@@ -93,7 +92,6 @@ function imagename (image) {
     return image.Id.slice(0,6);
   }
 }
-
 
 var Tabs = ReactSimpleTabs;
 var App = React.createClass({
@@ -166,6 +164,5 @@ var App = React.createClass({
 React.renderComponent(<App />, document.getElementById('tabs'));
 initHandlers();
 </script>
-
-<div>Your container is <span id="container_id">______</span></div>
-<br>
+</body>
+</html>
