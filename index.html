@@ -193,12 +193,12 @@ var App = React.createClass({
   },
   onRefreshImages: function () {
     $.get(ApiUrl() + '/v1.12/images/json', function (imagelist) {
-      this.setState({'images': imagelist, 'selectedImageId': imagelist[0].Id});
+      this.setState({'images': imagelist, 'selectedImageId': imagelist.length ? imagelist[0].Id : ''});
     }.bind(this));
   },
   onRefreshContainers: function () {
     $.get(ApiUrl() + '/v1.12/containers/json', function (containerlist) {
-      this.setState({'containers': containerlist, 'selectedContainerId': containerlist[0].Id});
+      this.setState({'containers': containerlist, 'selectedContainerId': containerlist.length ? containerlist[0].Id : ''});
     }.bind(this));
   },
   onImageChange: function (e) {
