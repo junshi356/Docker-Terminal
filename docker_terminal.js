@@ -1,4 +1,5 @@
-window.docker = (function(docker) {
+window.docker = (function() {
+  var docker = {};
   docker.terminal = {
     startTerminalForContainer: function(host, container) {
       var term = new Terminal(150, 40);
@@ -39,7 +40,7 @@ window.docker = (function(docker) {
 
 
   return docker;
-})(window.docker || {});
+})();
 
 function ApiUrl () {
   return 'http://' + $('#setting_host').val();
