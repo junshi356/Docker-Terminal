@@ -83,10 +83,24 @@ function ApiUrl () {
   return 'http://' + $('#setting_host').val();
 }
 function imagename (image) {
-  if (image.RepoTags.length) {
-    return image.RepoTags[0] + ' (' + image.Id.slice(0,6) + ')';
+  var hasrepodigests = image.RepoDigests != null && image.RepoDigests.length > 0 &&
+    !(image.RepoDigests.length == 1 && image.RepoDigests[0] === "<none>@<none>");
+  var hasrepotags = image.RepoTags != null && image.RepoTags.length > 0 &&
+    !(image.RepoTags.length == 1 && image.RepoTags[0] === "<none>:<none>");
+
+  var shortid;
+  if (hasrepodigests) {
+    var seploc = image.RepoDigests[0].indexOf(':');
+    shortid = image.RepoDigests[0].slice(0, seploc+7);
   } else {
-    return image.Id.slice(0,6);
+    var seploc = image.Id.indexOf(':');
+    shortid = image.Id.slice(0, seploc > 0 ? seploc+7 : 6);
+  }
+
+  if (hasrepotags) {
+    return image.RepoTags[0] + ' (' + shortid + ')';
+  } else {
+    return shortid;
   }
 }
 function containername (container) {
